@@ -23,4 +23,19 @@ def ban_user(message):
     else:
         bot.reply_to(message, "Эта команда должна быть использована в ответ на сообщение пользователя, которого вы хотите забанить.")
 
+@bot.message_handler(func=lambda message: True)  # Обработчик всех текстовых сообщений
+def check_for_link(message):
+    chat_id = message.chat.id  # Сохранение id чата
+    user_id = message.from_user.id  # Сохранение id пользователя
+    user_status = bot.get_chat_member(chat_id, user_id).status  # Получение статуса пользователя
+
+    # Проверка на наличие ссылки в сообщении
+    if 'http://' in message.text or 'https://' in message.text:
+        if user_status == 'administrator' or user_status == 'creator':
+            bot.reply_to(message, "Невозможно забанить администратора.")
+        else:
+            bot.ban_chat_member(chat_id, user_id)  # Пользователь будет забанен
+            bot.reply_to(message, f"Пользователь @{message.from_user.username} был забанен за отправку ссылки.")
+
+
 bot.infinity_polling(none_stop=True)
